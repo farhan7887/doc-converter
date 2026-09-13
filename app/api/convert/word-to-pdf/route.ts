@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import mammoth from "mammoth";
-import puppeteer from "puppeteer-core";
-import chromium from "@sparticuz/chromium";
+import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
 
 export async function POST(req: NextRequest) {
   try {
@@ -15,37 +14,61 @@ export async function POST(req: NextRequest) {
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
 
-    const { value: html } = await mammoth.convertToHtml({ buffer });
+    const { value: rawText } = await mammoth.extractRawText({ buffer });
 
-    const fullHtml = `
-      <html>
-        <head>
-          <meta charset="utf-8" />
-          <style>
-            body { font-family: Arial, sans-serif; font-size: 14px; line-height: 1.6; padding: 40px; }
-            img { max-width: 100%; }
-          </style>
-        </head>
-        <body>${html}</body>
-      </html>
-    `;
+    const pdfDoc = await PDFDocument.create();
+    const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
 
-    const isLocal = process.env.NODE_ENV === "development";
+    const fontSize = 12;
+    const lineHeight = 16;
+    const margin = 50;
+    const pageWidth = 595;
+    const pageHeight = 842;
+    const maxWidth = pageWidth - margin * 2;
 
-    const browser = await puppeteer.launch({
-      args: isLocal ? [] : chromium.args,
-      executablePath: isLocal
-        ? undefined
-        : await chromium.executablePath(),
-      headless: true,
-    });
+    let page = pdfDoc.addPage([pageWidth, pageHeight]);
+    let y = pageHeight - margin;
 
-    const page = await browser.newPage();
-    await page.setContent(fullHtml, { waitUntil: "load" });
-    const pdfBuffer = await page.pdf({ format: "A4", printBackground: true });
-    await browser.close();
+    const paragraphs = rawText.split("\n");
 
-    return new NextResponse(new Uint8Array(pdfBuffer), {
+    for (const paragraph of paragraphs) {
+      const words = paragraph.split(" ");
+      let currentLine = "";
+
+      for (const word of words) {
+        const testLine = currentLine ? currentLine + " " + word : word;
+        const testWidth = font.widthOfTextAtSize(testLine, fontSize);
+
+        if (testWidth > maxWidth && currentLine) {
+          if (y < margin) {
+            page = pdfDoc.addPage([pageWidth, pageHeight]);
+            y = pageHeight - margin;
+          }
+          page.drawText(currentLine, { x: margin, y, size: fontSize, font, color: rgb(0, 0, 0) });
+          y -= lineHeight;
+          currentLine = word;
+        } else {
+          currentLine = testLine;
+        }
+      }
+
+      if (y < margin) {
+        page = pdfDoc.addPage([pageWidth, pageHeight]);
+        y = pageHeight - margin;
+      }
+      page.drawText(currentLine, { x: margin, y, size: fontSize, font, color: rgb(0, 0, 0) });
+      y -= lineHeight;
+
+      y -= 6;
+      if (y < margin) {
+        page = pdfDoc.addPage([pageWidth, pageHeight]);
+        y = pageHeight - margin;
+      }
+    }
+
+    const pdfBytes = await pdfDoc.save();
+
+    return new NextResponse(new Uint8Array(pdfBytes), {
       headers: {
         "Content-Type": "application/pdf",
         "Content-Disposition": "attachment; filename=converted.pdf",

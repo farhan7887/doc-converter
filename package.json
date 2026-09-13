@@ -10,7 +10,6 @@
   },
   "dependencies": {
     "@base-ui/react": "^1.8.0",
-    "@sparticuz/chromium": "^153.0.0",
     "browser-image-compression": "^2.0.2",
     "class-variance-authority": "^0.7.1",
     "cn": "^0.3.0",
@@ -23,7 +22,6 @@
     "next": "16.3.5",
     "pdf-lib": "^1.17.1",
     "pdf2json": "^4.1.0",
-    "puppeteer-core": "^25.10.0",
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "shadcn": "^4.21.0",
