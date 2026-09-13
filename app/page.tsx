@@ -1,69 +1,165 @@
-import Image from "next/image";
+"use client";
+
+import Link from "next/link";
+import { motion } from "framer-motion";
+import { FileImage, FileText, FileType, Minimize2, FileEdit, ArrowRight } from "lucide-react";
+
+const tools = [
+  {
+    icon: FileImage,
+    title: "Image to PDF",
+    desc: "Convert JPG, PNG, WebP images into high-quality PDF files instantly.",
+    color: "#4F46E5",
+    bg: "#EEF2FF",
+    href: "/image-to-pdf",
+  },
+  {
+    icon: FileText,
+    title: "PDF to Word",
+    desc: "Turn PDF documents into fully editable Word files with layout preserved.",
+    color: "#0891B2",
+    bg: "#ECFEFF",
+    href: "/pdf-to-word",
+  },
+  {
+    icon: FileType,
+    title: "Word to PDF",
+    desc: "Convert Word documents to professional, shareable PDF format.",
+    color: "#059669",
+    bg: "#ECFDF5",
+    href: "/word-to-pdf",
+  },
+  {
+    icon: Minimize2,
+    title: "Compress Files",
+    desc: "Reduce image and PDF file size without losing quality.",
+    color: "#D97706",
+    bg: "#FFFBEB",
+    href: "/compress",
+  },
+  {
+    icon: FileEdit,
+    title: "Text to Document",
+    desc: "Type your text and export it instantly as a PDF or Word file.",
+    color: "#7C3AED",
+    bg: "#F5F3FF",
+    href: "/text-to-document",
+  },
+];
 
 export default function Home() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+    <main className="min-h-screen bg-white overflow-hidden">
+      {/* Hero Section */}
+      <section className="relative px-6 pt-24 pb-28 md:pt-32 md:pb-36">
+        <div className="pointer-events-none absolute -top-40 -left-40 w-96 h-96 rounded-full bg-indigo-300/30 blur-3xl" />
+        <div className="pointer-events-none absolute top-10 -right-32 w-96 h-96 rounded-full bg-cyan-300/30 blur-3xl" />
+
+        <div className="relative mx-auto max-w-4xl text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="inline-block mb-6 px-4 py-1.5 rounded-full bg-indigo-50 text-indigo-600 text-sm font-medium"
           >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+            No signup needed · Files auto-deleted in 1 hour
+          </motion.div>
+
+          <motion.h1
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.1 }}
+            className="text-4xl md:text-6xl font-bold tracking-tight text-slate-900"
           >
-            Documentation
-          </a>
+            Convert any file,{" "}
+            <span className="bg-gradient-to-r from-indigo-600 to-cyan-500 bg-clip-text text-transparent">
+              beautifully
+            </span>
+          </motion.h1>
+
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className="mt-6 text-lg text-slate-600 max-w-2xl mx-auto"
+          >
+            Image to PDF, PDF to Word, Word to PDF and more — fast, free,
+            and secure, with no watermarks left behind.
+          </motion.p>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.3 }}
+            className="mt-10 flex justify-center gap-4"
+          >
+            <button className="inline-flex items-center gap-2 rounded-full bg-slate-900 text-white px-7 py-3.5 font-medium hover:bg-slate-800 transition shadow-lg shadow-slate-900/10">
+              Start Converting <ArrowRight size={18} />
+            </button>
+          </motion.div>
         </div>
-      </main>
-    </div>
+      </section>
+
+      {/* Tools Grid */}
+      <section className="relative px-6 pb-24">
+        <div className="mx-auto max-w-6xl">
+          <div className="text-center mb-14">
+            <h2 className="text-2xl md:text-3xl font-bold text-slate-900">
+              Everything you need, in one place
+            </h2>
+            <p className="mt-3 text-slate-500">
+              Pick a tool below and convert your file in seconds.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-5">
+            {tools.map((tool, i) => (
+              <Link key={tool.title} href={tool.href}>
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5, delay: i * 0.08 }}
+                  whileHover={{ y: -6 }}
+                  className="group relative rounded-2xl border-2 p-6 cursor-pointer bg-white shadow-sm hover:shadow-2xl transition-all duration-300 h-full"
+                  style={{ borderColor: "#F1F5F9" }}
+                >
+                  <div
+                    className="pointer-events-none absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10 blur-xl"
+                    style={{ backgroundColor: tool.bg }}
+                  />
+
+                  <div
+                    className="w-14 h-14 rounded-2xl flex items-center justify-center mb-5 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3"
+                    style={{ backgroundColor: tool.bg, boxShadow: "0 8px 20px -8px " + tool.color + "55" }}
+                  >
+                    <tool.icon size={26} style={{ color: tool.color }} />
+                  </div>
+
+                  <h3 className="font-semibold text-lg mb-1.5 text-slate-900">
+                    {tool.title}
+                  </h3>
+                  <p className="text-sm text-slate-500 leading-relaxed">
+                    {tool.desc}
+                  </p>
+
+                  <div
+                    className="mt-4 inline-flex items-center gap-1 text-sm font-medium opacity-0 group-hover:opacity-100 -translate-x-1 group-hover:translate-x-0 transition-all duration-300"
+                    style={{ color: tool.color }}
+                  >
+                    Try it now <ArrowRight size={14} />
+                  </div>
+
+                  <div
+                    className="absolute top-0 left-6 right-6 h-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                    style={{ backgroundColor: tool.color }}
+                  />
+                </motion.div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+    </main>
   );
 }
