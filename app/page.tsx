@@ -93,9 +93,12 @@ export default function Home() {
             transition={{ duration: 0.6, delay: 0.3 }}
             className="mt-10 flex justify-center gap-4"
           >
-            <button className="inline-flex items-center gap-2 rounded-full bg-slate-900 text-white px-7 py-3.5 font-medium hover:bg-slate-800 transition shadow-lg shadow-slate-900/10">
+            <Link
+              href="/image-to-pdf"
+              className="inline-flex items-center gap-2 rounded-full bg-slate-900 text-white px-7 py-3.5 font-medium hover:bg-slate-800 transition shadow-lg shadow-slate-900/10"
+            >
               Start Converting <ArrowRight size={18} />
-            </button>
+            </Link>
           </motion.div>
         </div>
       </section>
