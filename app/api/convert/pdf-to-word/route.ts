@@ -4,7 +4,7 @@ import { createRequire } from "module";
 
 const require = createRequire(import.meta.url);
 const pdfParse = require("pdf-parse");
-
+export const runtime = "nodejs";
 export async function POST(req: NextRequest) {
   try {
     const formData = await req.formData();
