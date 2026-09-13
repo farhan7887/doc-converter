@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import mammoth from "mammoth";
-import puppeteer from "puppeteer";
+import puppeteer from "puppeteer-core";
+import chromium from "@sparticuz/chromium";
 
 export async function POST(req: NextRequest) {
   try {
@@ -14,7 +15,6 @@ export async function POST(req: NextRequest) {
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
 
-    // Convert Word -> HTML
     const { value: html } = await mammoth.convertToHtml({ buffer });
 
     const fullHtml = `
@@ -30,14 +30,22 @@ export async function POST(req: NextRequest) {
       </html>
     `;
 
-    // Convert HTML -> PDF using headless Chromium
-    const browser = await puppeteer.launch();
+    const isLocal = process.env.NODE_ENV === "development";
+
+    const browser = await puppeteer.launch({
+      args: isLocal ? [] : chromium.args,
+      executablePath: isLocal
+        ? undefined
+        : await chromium.executablePath(),
+      headless: true,
+    });
+
     const page = await browser.newPage();
     await page.setContent(fullHtml, { waitUntil: "load" });
     const pdfBuffer = await page.pdf({ format: "A4", printBackground: true });
     await browser.close();
 
-    return new NextResponse(Buffer.from(pdfBuffer), {
+    return new NextResponse(new Uint8Array(pdfBuffer), {
       headers: {
         "Content-Type": "application/pdf",
         "Content-Disposition": "attachment; filename=converted.pdf",

@@ -1,10 +1,24 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Document, Packer, Paragraph, TextRun } from "docx";
-import { createRequire } from "module";
+import PDFParser from "pdf2json";
 
-const require = createRequire(import.meta.url);
-const pdfParse = require("pdf-parse");
-export const runtime = "nodejs";
+function extractText(buffer: Buffer): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const pdfParser = new (PDFParser as any)(null, true);
+
+    pdfParser.on("pdfParser_dataError", (errData: any) => {
+      reject(errData.parserError);
+    });
+
+    pdfParser.on("pdfParser_dataReady", () => {
+      const text = (pdfParser as any).getRawTextContent();
+      resolve(text);
+    });
+
+    pdfParser.parseBuffer(buffer);
+  });
+}
+
 export async function POST(req: NextRequest) {
   try {
     const formData = await req.formData();
@@ -17,12 +31,15 @@ export async function POST(req: NextRequest) {
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
 
-    const data = await pdfParse(buffer);
+    const rawText = await extractText(buffer);
 
-    const lines = data.text.split("\n").filter((line: string) => line.trim().length > 0);
+    const lines = rawText
+      .split("\n")
+      .map((line) => line.trim())
+      .filter((line) => line.length > 0);
 
     const paragraphs = lines.map(
-      (line: string) =>
+      (line) =>
         new Paragraph({
           children: [new TextRun(line)],
         })
