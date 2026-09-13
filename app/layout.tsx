@@ -21,6 +21,26 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "DocConverter - Free Online File Conversion Tools",
   description: "Convert images to PDF, PDF to Word, Word to PDF, and more. Fast, free, and secure file conversion tools with no signup required.",
+  icons: {
+    icon: [
+      { url: "/favicon.ico" },
+      { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
+      { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+    ],
+    apple: "/apple-touch-icon.png",
+  },
+  openGraph: {
+    title: "DocConverter - Free Online File Conversion Tools",
+    description: "Convert images to PDF, PDF to Word, Word to PDF, and more. Fast, free, and secure — no signup needed.",
+    images: ["/og-image.png"],
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "DocConverter - Free Online File Conversion Tools",
+    description: "Convert images to PDF, PDF to Word, Word to PDF, and more. Fast, free, and secure — no signup needed.",
+    images: ["/og-image.png"],
+  },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
