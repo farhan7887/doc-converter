@@ -1,23 +1,33 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { motion } from "framer-motion";
-import { Upload, FileImage, Download, Loader2 } from "lucide-react";
+import { Upload, FileImage, Download, Loader2, Camera } from "lucide-react";
 
 export default function ImageToPdf() {
   const [files, setFiles] = useState<File[]>([]);
   const [loading, setLoading] = useState(false);
   const [downloadUrl, setDownloadUrl] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
 
   const addFiles = (newFiles: File[]) => {
-    setFiles(newFiles);
+    setFiles((prev) => [...prev, ...newFiles]);
     setDownloadUrl(null);
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       addFiles(Array.from(e.target.files));
+    }
+  };
+
+  const handleCameraCapture = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      addFiles(Array.from(e.target.files));
+    }
+    if (cameraInputRef.current) {
+      cameraInputRef.current.value = "";
     }
   };
 
@@ -37,6 +47,11 @@ export default function ImageToPdf() {
     if (e.dataTransfer.files) {
       addFiles(Array.from(e.dataTransfer.files));
     }
+  };
+
+  const removeFile = (index: number) => {
+    setFiles((prev) => prev.filter((_, i) => i !== index));
+    setDownloadUrl(null);
   };
 
   const handleConvert = async () => {
@@ -75,7 +90,7 @@ export default function ImageToPdf() {
             Image to PDF Converter
           </h1>
           <p className="mt-3 text-slate-500">
-            Upload one or more images and convert them into a single PDF.
+            Upload images or take a photo, and convert them into a single PDF.
           </p>
         </div>
 
@@ -99,6 +114,16 @@ export default function ImageToPdf() {
             className="hidden"
             id="file-upload"
           />
+          <input
+            ref={cameraInputRef}
+            type="file"
+            accept="image/*"
+            capture="environment"
+            onChange={handleCameraCapture}
+            className="hidden"
+            id="camera-capture"
+          />
+
           <label htmlFor="file-upload" className="cursor-pointer flex flex-col items-center gap-3">
             <Upload size={32} className="text-slate-400" />
             <span className="text-slate-600 font-medium">
@@ -109,6 +134,20 @@ export default function ImageToPdf() {
             </span>
           </label>
 
+          <div className="mt-5 flex items-center gap-3 justify-center">
+            <div className="h-px bg-slate-200 w-16" />
+            <span className="text-xs text-slate-400 font-medium">OR</span>
+            <div className="h-px bg-slate-200 w-16" />
+          </div>
+
+          <button
+            type="button"
+            onClick={() => cameraInputRef.current?.click()}
+            className="mt-5 inline-flex items-center gap-2 rounded-full bg-white border border-slate-200 text-slate-700 px-5 py-2.5 text-sm font-medium hover:border-indigo-300 hover:text-indigo-600 transition"
+          >
+            <Camera size={18} /> Take a Photo
+          </button>
+
           {files.length > 0 && (
             <div className="mt-6 text-left">
               <p className="text-sm font-medium text-slate-700 mb-2">
@@ -116,7 +155,15 @@ export default function ImageToPdf() {
               </p>
               <ul className="text-sm text-slate-500 space-y-1">
                 {files.map((f, i) => (
-                  <li key={i}>• {f.name}</li>
+                  <li key={i} className="flex items-center justify-between">
+                    <span>• {f.name}</span>
+                    <button
+                      onClick={() => removeFile(i)}
+                      className="text-slate-400 hover:text-rose-600 text-xs ml-2"
+                    >
+                      Remove
+                    </button>
+                  </li>
                 ))}
               </ul>
             </div>
