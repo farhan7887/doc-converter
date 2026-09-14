@@ -1,23 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { Document, Packer, Paragraph, TextRun } from "docx";
-import PDFParser from "pdf2json";
-
-function extractText(buffer: Buffer): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const pdfParser = new (PDFParser as any)(null, true);
-
-    pdfParser.on("pdfParser_dataError", (errData: any) => {
-      reject(errData.parserError);
-    });
-
-    pdfParser.on("pdfParser_dataReady", () => {
-      const text = (pdfParser as any).getRawTextContent();
-      resolve(text);
-    });
-
-    pdfParser.parseBuffer(buffer);
-  });
-}
+import { Document, Packer, Paragraph, TextRun, HeadingLevel } from "docx";
 
 export async function POST(req: NextRequest) {
   try {
@@ -29,21 +11,66 @@ export async function POST(req: NextRequest) {
     }
 
     const arrayBuffer = await file.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
+    const uint8Array = new Uint8Array(arrayBuffer);
 
-    const rawText = await extractText(buffer);
+    const pdfjsLib = await import("pdfjs-dist/legacy/build/pdf.mjs");
+    const loadingTask = pdfjsLib.getDocument({ data: uint8Array });
+    const pdf = await loadingTask.promise;
 
-    const lines = rawText
-      .split("\n")
-      .map((line) => line.trim())
-      .filter((line) => line.length > 0);
+    const paragraphs: Paragraph[] = [];
 
-    const paragraphs = lines.map(
-      (line) =>
-        new Paragraph({
-          children: [new TextRun(line)],
-        })
-    );
+    for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+      const page = await pdf.getPage(pageNum);
+      const textContent = await page.getTextContent();
+
+      let lastY: number | null = null;
+      let currentLine = "";
+      let currentFontSize = 12;
+
+      const fontSizes: number[] = textContent.items
+        .map((item: any) => item.transform[3])
+        .filter((h: number) => h > 0);
+      const avgFontSize =
+        fontSizes.length > 0 ? fontSizes.reduce((a, b) => a + b, 0) / fontSizes.length : 12;
+
+      const flushLine = () => {
+        if (!currentLine.trim()) {
+          currentLine = "";
+          return;
+        }
+        const isHeading = currentFontSize > avgFontSize * 1.3;
+        paragraphs.push(
+          new Paragraph({
+            heading: isHeading ? HeadingLevel.HEADING_2 : undefined,
+            children: [
+              new TextRun({
+                text: currentLine.trim(),
+                bold: isHeading,
+              }),
+            ],
+          })
+        );
+        currentLine = "";
+      };
+
+      for (const item of textContent.items as any[]) {
+        const y = item.transform[5];
+        const fontSize = item.transform[3];
+
+        if (lastY !== null && Math.abs(y - lastY) > 3) {
+          flushLine();
+        }
+
+        currentLine += item.str + (item.hasEOL ? "" : " ");
+        currentFontSize = fontSize;
+        lastY = y;
+      }
+      flushLine();
+
+      if (pageNum < pdf.numPages) {
+        paragraphs.push(new Paragraph({ children: [new TextRun("")] }));
+      }
+    }
 
     const doc = new Document({
       sections: [
